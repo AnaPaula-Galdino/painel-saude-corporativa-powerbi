@@ -1,0 +1,6 @@
+faixa_id,faixa_etaria,fator_risco
+F1,0-18,0.7
+F2,19-30,0.8
+F3,31-45,1.0
+F4,46-59,1.6
+F5,60+,2.8
