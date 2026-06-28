@@ -1,0 +1,36 @@
+{
+  "name": "Executivo Azul - Saúde Corporativa",
+  "dataColors": ["#1f3a5f", "#2a9d9d", "#2e6da4", "#5b9bd5", "#7fb0d8", "#9bd1c9", "#e0a93b", "#d2553f"],
+  "background": "#FFFFFF",
+  "foreground": "#1f3a5f",
+  "tableAccent": "#2a9d9d",
+  "good": "#2e9e6b",
+  "neutral": "#e0a93b",
+  "bad": "#d2553f",
+  "maximum": "#1f3a5f",
+  "center": "#5b9bd5",
+  "minimum": "#9bd1c9",
+  "textClasses": {
+    "title":    { "fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#1f3a5f" },
+    "header":   { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#1f3a5f" },
+    "label":    { "fontFace": "Segoe UI", "fontSize": 10, "color": "#6b7280" },
+    "callout":  { "fontFace": "Segoe UI Bold", "fontSize": 28, "color": "#1f3a5f" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#E3E7EE" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true, "preset": "Custom", "color": { "solid": { "color": "#1f3a5f" } }, "transparency": 90, "blur": 6, "shadowSpread": 0 }],
+        "title": [{ "show": true, "fontColor": { "solid": { "color": "#1f3a5f" } }, "fontSize": 12, "fontFamily": "Segoe UI Semibold", "alignment": "left" }]
+      }
+    },
+    "page": {
+      "*": { "background": [{ "color": { "solid": { "color": "#F3F4F7" } }, "transparency": 0 }] }
+    },
+    "card": {
+      "*": { "labels": [{ "color": { "solid": { "color": "#1f3a5f" } }, "fontSize": 24 }],
+             "categoryLabels": [{ "color": { "solid": { "color": "#6b7280" } }, "fontSize": 10 }] }
+    }
+  }
+}

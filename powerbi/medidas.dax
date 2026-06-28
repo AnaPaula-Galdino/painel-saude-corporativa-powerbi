@@ -1,0 +1,109 @@
+// ============================================================
+//  Painel Executivo - Saúde Corporativa
+//  Medidas DAX  (tabela: _Medidas)
+//  Autora: Ana Paula Galdino
+// ------------------------------------------------------------
+//  Modelo estrela:
+//    fato_sinistros (custo, qtd)  e  fato_carteira (vidas, receita)
+//    dim_tempo, dim_empresa, dim_plano, dim_categoria, dim_faixa
+// ============================================================
+
+// ---------- Bases ----------
+Receita =
+SUM ( fato_carteira[receita] )
+
+Custo Assistencial =
+SUM ( fato_sinistros[custo] )
+
+Qtd Atendimentos =
+SUM ( fato_sinistros[qtd] )
+
+// Exposição (vidas-mês): soma de vidas no período filtrado
+Vidas-Mês =
+SUM ( fato_carteira[vidas] )
+
+// Vidas médias por mês (para cartões de "vidas ativas")
+Vidas Médias =
+AVERAGEX ( VALUES ( dim_tempo[mes_id] ), [Vidas-Mês] )
+
+// ---------- KPIs de negócio ----------
+Sinistralidade =
+DIVIDE ( [Custo Assistencial], [Receita] )
+
+Meta Sinistralidade = 0.75
+
+Sinistralidade vs Meta (p.p.) =
+( [Sinistralidade] - [Meta Sinistralidade] ) * 100
+
+Resultado =
+[Receita] - [Custo Assistencial]
+
+Margem =
+DIVIDE ( [Resultado], [Receita] )
+
+// PMPM = custo médio por vida por mês (Per Member Per Month)
+PMPM =
+DIVIDE ( [Custo Assistencial], [Vidas-Mês] )
+
+Ticket Médio =
+DIVIDE ( [Custo Assistencial], [Qtd Atendimentos] )
+
+% Internações =
+VAR _int =
+    CALCULATE ( [Custo Assistencial], dim_categoria[categoria] = "Internações" )
+RETURN
+    DIVIDE ( _int, [Custo Assistencial] )
+
+% Pronto-Socorro (atend.) =
+VAR _ps =
+    CALCULATE ( [Qtd Atendimentos], dim_categoria[categoria] = "Pronto-Socorro" )
+RETURN
+    DIVIDE ( _ps, [Qtd Atendimentos] )
+
+// ---------- Inteligência de tempo ----------
+Custo Mês Anterior =
+CALCULATE ( [Custo Assistencial], DATEADD ( dim_tempo[data], -1, MONTH ) )
+
+Custo MoM % =
+DIVIDE ( [Custo Assistencial] - [Custo Mês Anterior], [Custo Mês Anterior] )
+
+Custo Ano Anterior =
+CALCULATE ( [Custo Assistencial], SAMEPERIODLASTYEAR ( dim_tempo[data] ) )
+
+Custo YoY % =
+DIVIDE ( [Custo Assistencial] - [Custo Ano Anterior], [Custo Ano Anterior] )
+
+Custo YTD =
+TOTALYTD ( [Custo Assistencial], dim_tempo[data] )
+
+Sinistralidade YTD =
+VAR _cYTD = TOTALYTD ( [Custo Assistencial], dim_tempo[data] )
+VAR _rYTD = TOTALYTD ( [Receita], dim_tempo[data] )
+RETURN
+    DIVIDE ( _cYTD, _rYTD )
+
+// ---------- Rankings e seleção ----------
+Ranking PMPM Empresa =
+IF (
+    HASONEVALUE ( dim_empresa[empresa] ),
+    RANKX ( ALL ( dim_empresa[empresa] ), [PMPM],, DESC )
+)
+
+Carteiras Acima da Meta =
+COUNTROWS (
+    FILTER ( VALUES ( dim_empresa[empresa] ), [Sinistralidade] > [Meta Sinistralidade] )
+)
+
+// ---------- Formatação condicional (retorna HEX) ----------
+Cor Sinistralidade =
+SWITCH (
+    TRUE (),
+    [Sinistralidade] >= 0.75, "#D2553F",   // vermelho: acima da meta
+    [Sinistralidade] >= 0.72, "#E0A93B",   // âmbar: atenção
+    "#2A9D9D"                              // verde-água: saudável
+)
+
+// ---------- Rótulo dinâmico do KPI ----------
+Título Sinistralidade =
+"Sinistralidade: " & FORMAT ( [Sinistralidade], "0.0%" )
+    & " (meta " & FORMAT ( [Meta Sinistralidade], "0%" ) & ")"
